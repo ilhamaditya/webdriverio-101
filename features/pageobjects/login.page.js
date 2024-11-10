@@ -14,13 +14,14 @@ class LoginPage {
   }
 
   async login(username, password) {
+    await this.usernameInput.waitForDisplayed({ timeout: 5000 });
     await this.usernameInput.setValue(username);
     await this.passwordInput.setValue(password);
     await this.loginButton.click();
   }
 
   async verifyDashboardURL() {
-    await expect(browser).toHaveUrlContaining("/dashboard/index");
+    await expect(browser).toHaveUrl('https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index');
   }
 }
 
