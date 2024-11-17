@@ -3,6 +3,7 @@
 allure*
 *.bak.js
 node_modules
+screenshots/*
 
 # Logs
 logs
