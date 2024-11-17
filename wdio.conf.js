@@ -1,6 +1,6 @@
 exports.config = {
   runner: "local",
-  specs: ["./features/**/*.feature"], // Updated path
+  specs: ["./features/**/*.feature"],
   exclude: [],
   maxInstances: 10,
   capabilities: [
@@ -8,16 +8,22 @@ exports.config = {
       browserName: "chrome",
     },
   ],
-  logLevel: "info",
+  logLevel: "debug",
   bail: 0,
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
   connectionRetryCount: 3,
-  services: [], // Removed docker service
+  services: [],
   framework: "cucumber",
-  reporters: ["spec", ["allure", { outputDir: "allure-results" }]],
+  reporters: [
+    "spec",
+    [
+      "allure",
+      { outputDir: "allure-results"},
+    ],
+  ],
   cucumberOpts: {
-    featureDefaultLocation: "./features/**/*.feature", // Ensure correct path
+    featureDefaultLocation: "./features/**/*.feature",
     require: ["./features/step-definitions/*.steps.js"],
     backtrace: false,
     requireModule: [],
@@ -31,4 +37,5 @@ exports.config = {
     timeout: 60000,
     ignoreUndefinedDefinitions: false,
   },
+  maxRetry: 2,
 };

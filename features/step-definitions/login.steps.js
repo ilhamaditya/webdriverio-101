@@ -10,4 +10,5 @@ When("I enter username and password", async function () {
 });
 
 Then("I verify dashboard URL", async function () {
+  await LoginPage.verifyDashboardURL();
 });
