@@ -1,6 +1,6 @@
 exports.config = {
   runner: "local",
-  specs: ["./features/**/*.feature"],
+  specs: ["./../features/**/*.feature"],
   exclude: [],
   maxInstances: 10,
   capabilities: [
@@ -15,27 +15,19 @@ exports.config = {
   connectionRetryCount: 3,
   services: [],
   framework: "cucumber",
-  reporters: [
-    "spec",
-    [
-      "allure",
-      { outputDir: "allure-results"},
-    ],
-  ],
+  reporters: ["spec", ["allure", { outputDir: "allure-results" }]],
   cucumberOpts: {
-    featureDefaultLocation: "./features/**/*.feature",
-    require: ["./features/step-definitions/*.steps.js"],
+    require: ["./step-definitions/**/**/*.steps.js"],
     backtrace: false,
-    requireModule: [],
     dryRun: false,
     failFast: false,
-    name: [],
     snippets: true,
     source: true,
     strict: false,
-    tagExpression: "",
     timeout: 60000,
     ignoreUndefinedDefinitions: false,
   },
-  maxRetry: 2,
+  beforeScenario: function (world, context) {
+    console.log(`Running scenario: ${world.name}`);
+  },
 };
