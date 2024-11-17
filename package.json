@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "clean-allure-results": "rm -rf allure-results",
-    "wdio": "wdio run ./wdio.conf.js",
+    "wdio": "npx wdio run ./config/wdio.conf.js",
     "allure-generate": "allure generate allure-results --clean",
     "allure-open": "allure open allure-report",
-    "test": "npm run clean-allure-results && npx wdio run ./wdio.conf.js && npm run allure-generate && npm run allure-open"
+    "test": "npm run wdio && npm run allure-generate && npm run allure-open"
   },
   "keywords": [],
   "author": "",
@@ -18,9 +18,13 @@
     "@wdio/cli": "^9.2.11",
     "@wdio/cucumber-framework": "^9.2.8",
     "@wdio/local-runner": "^9.2.11",
+    "@wdio/selenium-standalone-service": "^8.14.0",
     "@wdio/spec-reporter": "^9.2.8",
     "wdio-cucumber-viewport-logger-service": "^2.1.36-alpha.0",
     "wdio-docker-service": "^3.2.1",
     "wdio-slack-service": "^2.0.9"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2"
   }
 }
