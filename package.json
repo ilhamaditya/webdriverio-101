@@ -6,9 +6,11 @@
   "scripts": {
     "clean-allure-results": "rm -rf allure-results",
     "wdio": "npx wdio run ./config/wdio.conf.js",
+    "wdio:docker": "npx wdio run ./config/wdio.conf.docker.js",
     "allure-generate": "allure generate allure-results --clean",
     "allure-open": "allure open allure-report",
-    "test": "npm run wdio && npm run allure-generate && npm run allure-open"
+    "test": "npm run clean-allure-results && npm run wdio && npm run allure-generate && npm run allure-open",
+    "dock": "npm run clean-allure-results && npm run wdio:docker && npm run allure-generate && npm run allure-open"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,64 @@
+exports.config = {
+  runner: "local",
+  specs: ["./../features/**/*.feature"],
+  exclude: [],
+  maxInstances: 1,
+  capabilities: [
+    {
+      browserName: "chrome",
+      "selenoid:options": {
+        enableVnc: true,
+        enableVideo: true,
+        screenResolution: "1920x1080x24",
+      },
+    },
+  ],
+  logLevel: "info",
+  bail: 0,
+  waitforTimeout: 10000,
+  connectionRetryTimeout: 120000,
+  connectionRetryCount: 3,
+  services: [
+    [
+      "docker",
+      {
+        containers: [
+          {
+            image: "selenoid/vnc:chrome_114.0",
+            args: ["--shm-size=2g"],
+          },
+        ],
+        options: {
+          healthCheck: {
+            url: "http://localhost:4444/status",
+            maxRetries: 3,
+            inspectInterval: 1000,
+          },
+          protocol: "http",
+          hostname: "localhost",
+          port: 4444,
+          path: "/wd/hub",
+        },
+      },
+    ],
+  ],
+  framework: "cucumber",
+  reporters: [
+    "spec",
+    [
+      "allure",
+      { outputDir: "allure-results", disableWebdriverStepsReporting: true },
+    ],
+  ],
+  cucumberOpts: {
+    require: ["./step-definitions/**/*.steps.js"],
+    backtrace: false,
+    dryRun: false,
+    failFast: false,
+    snippets: true,
+    source: true,
+    strict: false,
+    timeout: 60000,
+    ignoreUndefinedDefinitions: false,
+  },
+};

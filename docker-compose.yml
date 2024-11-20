@@ -1,0 +1,30 @@
+version: "3"
+services:
+  selenoid:
+    image: aerokube/selenoid:latest-release
+    platform: linux/amd64
+    volumes:
+      - "./config:/etc/selenoid"  # Ensure this path is correct
+      - "./videos:/opt/selenoid/video"
+      - "./logs:/opt/selenoid/logs"
+    ports:
+      - "4444:4444"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
+      - OVERRIDE_LOG_OUTPUT_DIR=/opt/selenoid/logs
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui:latest-release
+    platform: linux/amd64
+    depends_on:
+      - selenoid
+    ports:
+      - "8080:8080"
+
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
