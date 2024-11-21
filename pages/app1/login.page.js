@@ -2,10 +2,10 @@ const BasePage = require('./../../pages/base.page');
 
 class LoginPage extends BasePage {
   get usernameInput() {
-    return $('//input[@placeholder="Username"]');
+    return $('//input[@placeholder="username"]');
   }
   get passwordInput() {
-    return $('//input[@placeholder="Password"]');
+    return $('//input[@placeholder="password"]');
   }
   get loginButton() {
     return $('//button[@type="submit"]');
