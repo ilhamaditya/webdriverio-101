@@ -4,7 +4,7 @@ services:
     image: aerokube/selenoid:latest-release
     platform: linux/amd64
     volumes:
-      - "./config:/etc/selenoid"  # Ensure this path is correct
+      - "./config:/etc/selenoid"
       - "./videos:/opt/selenoid/video"
       - "./logs:/opt/selenoid/logs"
       - "./config/browsers.json:/etc/selenoid/browsers.json"
@@ -27,5 +27,7 @@ services:
     ports:
       - "5050:5050"
     volumes:
-      - ./allure-results:/app/allure-results
-      - ./allure-report:/app/allure-report
+      - "./allure-results:/app/allure-results"
+      - "./allure-report:/app/allure-report"
+
+
