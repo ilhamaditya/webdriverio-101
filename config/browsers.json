@@ -8,15 +8,5 @@
         "path": "/"
       }
     }
-  },
-  "firefox": {
-    "default": "114.0",
-    "versions": {
-      "114.0": {
-        "image": "selenoid/vnc:firefox_114.0",
-        "port": "4444",
-        "path": "/"
-      }
-    }
   }
 }

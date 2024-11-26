@@ -25,7 +25,7 @@ exports.config = {
         containers: [
           {
             image: "selenoid/vnc:chrome_114.0",
-            args: ["--shm-size=2g"],
+            args: ["--shm-size=2g"], // Ensure this key exists
           },
         ],
         options: {
@@ -60,5 +60,27 @@ exports.config = {
     strict: false,
     timeout: 60000,
     ignoreUndefinedDefinitions: false,
+  },
+  onComplete: function () {
+    const fs = require("fs");
+    const path = require("path");
+    const allureResultsPath = path.join(__dirname, "../allure-results");
+
+    // Ensure directory exists
+    if (!fs.existsSync(allureResultsPath)) {
+      fs.mkdirSync(allureResultsPath);
+    }
+
+    const executor = {
+      name: "Dockerized WebdriverIO",
+      type: "webdriverio",
+      url: process.env.WEB_URL || "http://localhost:4444",
+      buildOrder: "1",
+    };
+
+    fs.writeFileSync(
+      path.join(allureResultsPath, "executor.json"),
+      JSON.stringify(executor, null, 2)
+    );
   },
 };

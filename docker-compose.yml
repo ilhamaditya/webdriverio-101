@@ -7,6 +7,7 @@ services:
       - "./config:/etc/selenoid"  # Ensure this path is correct
       - "./videos:/opt/selenoid/video"
       - "./logs:/opt/selenoid/logs"
+      - "./config/browsers.json:/etc/selenoid/browsers.json"
     ports:
       - "4444:4444"
     environment:
