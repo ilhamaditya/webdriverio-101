@@ -21,6 +21,8 @@ services:
       - selenoid
     ports:
       - "8080:8080"
+    environment:
+      - SELENOID_URI=http://selenoid:4444
 
   allure:
     image: frankescobar/allure-docker-service:latest
@@ -29,5 +31,6 @@ services:
     volumes:
       - "./allure-results:/app/allure-results"
       - "./allure-report:/app/allure-report"
-
-
+    environment:
+      - ALLURE_RESULT_PATH=/app/allure-results
+      - ALLURE_REPORT_PATH=/app/allure-report

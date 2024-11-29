@@ -25,7 +25,7 @@ exports.config = {
         containers: [
           {
             image: "selenoid/vnc:chrome_114.0",
-            args: ["--shm-size=2g"], // Ensure this key exists
+            args: ["--shm-size=2g"], // Ensure args are defined
           },
         ],
         options: {
@@ -47,7 +47,11 @@ exports.config = {
     "spec",
     [
       "allure",
-      { outputDir: "allure-results", disableWebdriverStepsReporting: true },
+      {
+        outputDir: "allure-results", // Make sure this points to the correct directory
+        disableWebdriverStepsReporting: true,
+        disableWebdriverScreenshotsReporting: false, // Optional: You can also include screenshots
+      },
     ],
   ],
   cucumberOpts: {
