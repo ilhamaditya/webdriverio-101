@@ -70,16 +70,17 @@ exports.config = {
     const path = require("path");
     const allureResultsPath = path.join(__dirname, "../allure-results");
 
-    // Ensure directory exists
+    // Buat folder allure-results jika belum ada
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
 
     const executor = {
-      name: "Dockerized WebdriverIO",
+      name: "WebdriverIO Docker",
       type: "webdriverio",
       url: process.env.WEB_URL || "http://localhost:4444",
       buildOrder: "1",
+      reportName: "WebdriverIO Allure Report",
     };
 
     fs.writeFileSync(
