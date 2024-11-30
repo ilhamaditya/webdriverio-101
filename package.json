@@ -13,7 +13,8 @@
 
     "allure-generate-dock": "curl -X POST http://localhost:5050/generate || echo 'Failed to generate allure report'",
     "allure-open-dock": "open http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html || echo 'Failed to open allure report'",
-    "dock": "npm run clean-allure-results && npm run wdio:dock && npm run allure-generate-dock && npm run allure-open-dock"
+    "wait-for-allure": "node ./config/waitForAllure.js",
+    "dock": "npm run clean-allure-results && npm run wdio:dock && npm run wait-for-allure && npm run allure-generate-dock && npm run allure-open-dock"
   },
   "keywords": [],
   "author": "",
