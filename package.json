@@ -4,15 +4,15 @@
   "description": "Simulasi wdio | allure | docker | github actions | slack",
   "main": "index.js",
   "scripts": {
-    "clean-allure-results": "rm -rf allure-results",
+    "clean-allure-results": "find allure-results/ -type f ! -name 'executor.json' -exec rm -f {} \\;",
     "wdio": "npx wdio run ./config/wdio.conf.js",
     "wdio:dock": "npx wdio run ./config/wdio.conf.dock.js",
     "allure-generate": "allure generate allure-results --clean",
     "allure-open": "allure open allure-report",
     "test": "npm run clean-allure-results && npm run wdio && npm run allure-generate && npm run allure-open",
 
-    "allure-generate-dock": "curl -X GET http://localhost:5050/generate",
-    "allure-open-dock": "open http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html",
+    "allure-generate-dock": "curl -X POST http://localhost:5050/generate || echo 'Failed to generate allure report'",
+    "allure-open-dock": "open http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html || echo 'Failed to open allure report'",
     "dock": "npm run clean-allure-results && npm run wdio:dock && npm run allure-generate-dock && npm run allure-open-dock"
   },
   "keywords": [],

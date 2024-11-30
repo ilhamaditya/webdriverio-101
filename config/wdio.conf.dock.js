@@ -70,7 +70,7 @@ exports.config = {
     const path = require("path");
     const allureResultsPath = path.join(__dirname, "../allure-results");
 
-    // Buat folder allure-results jika belum ada
+    // Create a results folder if it doesn't already exist
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
