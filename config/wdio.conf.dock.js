@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 exports.config = {
   runner: "local",
   specs: ["./../features/**/*.feature"],
@@ -117,8 +119,7 @@ exports.config = {
 
     // Send Slack notification
     const axios = require("axios");
-    const url =
-      "https://hooks.slack.com/services/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"; // Replace with your webhook URL
+    const slackWebhook = process.env.SLACK_WEBHOOK; // Replace with your webhook URL
     const slackMessage = {
       text: "Test execution completed! Allure report is available.",
       attachments: [
@@ -133,7 +134,7 @@ exports.config = {
     };
 
     try {
-      await axios.post(url, slackMessage);
+      await axios.post(slackWebhook, slackMessage);
       console.log("Slack notification sent!");
     } catch (error) {
       console.error("Error sending Slack notification:", error);
