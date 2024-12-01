@@ -10,7 +10,6 @@
     "allure-generate": "allure generate allure-results --clean",
     "allure-open": "allure open allure-report",
     "test": "npm run clean-allure-results && npm run wdio && npm run allure-generate && npm run allure-open",
-
     "allure-generate-dock": "curl -X POST http://localhost:5050/generate || echo 'Failed to generate allure report'",
     "allure-open-dock": "open http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html || echo 'Failed to open allure report'",
     "wait-for-allure": "node ./config/waitForAllure.js",
@@ -31,6 +30,7 @@
     "wdio-slack-service": "^2.0.9"
   },
   "dependencies": {
+    "axios": "^1.7.8",
     "reflect-metadata": "^0.2.2"
   }
 }
