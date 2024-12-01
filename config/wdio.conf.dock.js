@@ -118,7 +118,7 @@ exports.config = {
     // Send Slack notification
     const axios = require("axios");
     const url =
-      "https://hooks.slack.com/services/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"; // Replace with your webhook URL
+      "https://hooks.slack.com/services/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"; // Replace with your webhook URL
     const slackMessage = {
       text: "Test execution completed! Allure report is available.",
       attachments: [
