@@ -70,11 +70,11 @@ exports.config = {
     console.log("Running onPrepare hook...");
     // Prepare tasks before tests start (e.g., clean up reports, setup databases)
   },
-  
+
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);
   },
-  
+
   afterTest: async function (test) {
     if (test.error) {
       console.log(`Test failed: ${test.title}`);
@@ -82,16 +82,17 @@ exports.config = {
     }
     console.log(`Test finished: ${test.title}`);
   },
-  
+
   beforeScenario: async function (scenario) {
     console.log(`Starting scenario: ${scenario.name}`);
   },
-  
+
   afterScenario: async function (scenario) {
     console.log(`Finished scenario: ${scenario.name}`);
   },
-  
+
   onComplete: async function () {
+    console.log("onComplete hook is triggered!");
     const fs = require("fs");
     const path = require("path");
     const allureResultsPath = path.join(__dirname, "../allure-results");
@@ -115,16 +116,20 @@ exports.config = {
     console.log("onComplete: Report generated.");
 
     // Send Slack notification
-    const axios = require('axios');
-    const url = 'https://hooks.slack.com/services/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'; // Replace with your webhook URL
+    const axios = require("axios");
+    const url =
+      "https://hooks.slack.com/services/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"; // Replace with your webhook URL
     const slackMessage = {
-      text: 'Test execution completed! Allure report is available.',
-      attachments: [{
-        title: 'Allure Report',
-        title_link: 'http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html', // Allure report URL
-        color: '#36a64f',
-        fallback: 'Click to view Allure report'
-      }]
+      text: "Test execution completed! Allure report is available.",
+      attachments: [
+        {
+          title: "Allure Report",
+          title_link:
+            "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html", // Allure report URL
+          color: "#36a64f",
+          fallback: "Click to view Allure report",
+        },
+      ],
     };
 
     try {
@@ -134,8 +139,7 @@ exports.config = {
       console.error("Error sending Slack notification:", error);
     }
   },
-  
   // Retry Mechanism
-  maxRetries: 3, 
+  maxRetries: 3,
   retry: 2,
 };
