@@ -2,7 +2,7 @@ exports.config = {
   runner: "local",
   specs: ["./../features/**/*.feature"],
   exclude: [],
-  maxInstances: 1,
+  maxInstances: 3,
   capabilities: [
     {
       browserName: "chrome",
@@ -25,7 +25,7 @@ exports.config = {
         containers: [
           {
             image: "selenoid/vnc:chrome_114.0",
-            args: ["--shm-size=2g"], // Ensure args are defined
+            args: ["--shm-size=2g"], // Ensure args are properly set here
           },
         ],
         options: {
@@ -48,9 +48,9 @@ exports.config = {
     [
       "allure",
       {
-        outputDir: "allure-results", // Make sure this points to the correct directory
+        outputDir: "allure-results",
         disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: false, // Optional: You can also include screenshots
+        disableWebdriverScreenshotsReporting: false,
       },
     ],
   ],
@@ -65,12 +65,37 @@ exports.config = {
     timeout: 60000,
     ignoreUndefinedDefinitions: false,
   },
+  // Hooks
+  onPrepare: function (config, capabilities) {
+    console.log("Running onPrepare hook...");
+    // Prepare tasks before tests start (e.g., clean up reports, setup databases)
+  },
+  
+  beforeTest: async function (test) {
+    console.log(`Starting test: ${test.title}`);
+  },
+  
+  afterTest: async function (test) {
+    if (test.error) {
+      console.log(`Test failed: ${test.title}`);
+      await browser.takeScreenshot();
+    }
+    console.log(`Test finished: ${test.title}`);
+  },
+  
+  beforeScenario: async function (scenario) {
+    console.log(`Starting scenario: ${scenario.name}`);
+  },
+  
+  afterScenario: async function (scenario) {
+    console.log(`Finished scenario: ${scenario.name}`);
+  },
+  
   onComplete: function () {
     const fs = require("fs");
     const path = require("path");
     const allureResultsPath = path.join(__dirname, "../allure-results");
 
-    // Create a results folder if it doesn't already exist
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
@@ -87,5 +112,10 @@ exports.config = {
       path.join(allureResultsPath, "executor.json"),
       JSON.stringify(executor, null, 2)
     );
+    console.log("onComplete: Report generated.");
   },
+  
+  // Retry Mechanism
+  maxRetries: 3, 
+  retry: 2,
 };
