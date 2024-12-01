@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const url = 'http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html';
 const maxRetries = 10;
-const retryInterval = 5000; // 5 seconds
+const retryInterval = 5000;
 
 async function checkReportAvailability() {
   try {
