@@ -1,0 +1,59 @@
+name: WebdriverIO CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:latest
+        options: --privileged
+        ports:
+          - 4444:4444
+          - 8080:8080
+          - 5050:5050
+
+    steps:
+      # Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Start Selenoid
+      - name: Start Docker Compose
+        run: docker-compose up -d
+
+      # Wait for Selenoid to be ready
+      - name: Wait for Selenoid
+        run: until curl -sSf http://localhost:4444/status > /dev/null; do sleep 5; done
+
+      # Run WebdriverIO Tests
+      - name: Run Tests
+        env:
+          WEB_URL: ${{ secrets.WEB_URL }}
+          WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
+          WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: npm run dock
+
+      # Post results to Slack
+      - name: Notify Slack
+        if: always()
+        run: echo "Slack notification sent!"
