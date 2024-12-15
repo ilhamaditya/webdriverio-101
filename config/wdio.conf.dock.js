@@ -93,16 +93,19 @@ exports.config = {
     console.log(`Finished scenario: ${scenario.name}`);
   },
 
-  onComplete: async function () {
+  onComplete: async function (exitCode) {
     console.log("onComplete hook is triggered!");
+  
     const fs = require("fs");
     const path = require("path");
+    const axios = require("axios");
     const allureResultsPath = path.join(__dirname, "../allure-results");
-
+  
+    // Generate executor.json for Allure report
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
-
+  
     const executor = {
       name: "WebdriverIO Docker",
       type: "webdriverio",
@@ -110,34 +113,36 @@ exports.config = {
       buildOrder: "1",
       reportName: "WebdriverIO Allure Report",
     };
-
+  
     fs.writeFileSync(
       path.join(allureResultsPath, "executor.json"),
       JSON.stringify(executor, null, 2)
     );
-    console.log("onComplete: Report generated.");
-
-    // Send Slack notification
-    const axios = require("axios");
-    const slackWebhook = process.env.SLACK_WEBHOOK; // Replace with your webhook URL
+    console.log("onComplete: Allure executor.json created.");
+  
+    // Send Slack Notification
+    const slackWebhook = process.env.SLACK_WEBHOOK;
+    const reportUrl = "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html";
+    const statusMessage = exitCode === 0 ? "Success" : "Failure";
+  
     const slackMessage = {
-      text: "Test execution completed! Allure report is available.",
+      text: `*Test Execution Completed*: ${statusMessage}`,
       attachments: [
         {
           title: "Allure Report",
-          title_link:
-            "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html", // Allure report URL
-          color: "#36a64f",
-          fallback: "Click to view Allure report",
+          title_link: reportUrl,
+          text: `Click to view the Allure report`,
+          color: statusMessage === "Success" ? "#36a64f" : "#ff0000",
+          fallback: "Click to view the Allure report",
         },
       ],
     };
-
+  
     try {
       await axios.post(slackWebhook, slackMessage);
-      console.log("Slack notification sent!");
+      console.log("Slack notification sent successfully.");
     } catch (error) {
-      console.error("Error sending Slack notification:", error);
+      console.error("Error sending Slack notification:", error.message);
     }
   },
   // Retry Mechanism
