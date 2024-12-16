@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Use a specific Ubuntu version
     strategy:
       fail-fast: false
       matrix:
@@ -46,14 +46,17 @@ jobs:
 
       - name: Start Docker Compose
         run: |
-          docker compose -f docker-compose.yml up -d
-
+          docker-compose -f docker-compose.yml up -d
 
       - name: Wait for All Services
         run: |
           for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
             until curl -sSf $service > /dev/null; do sleep 5; done
           done
+
+      - name: Check Docker Compose status
+        run: |
+          docker-compose ps
 
       # Run WebdriverIO Tests
       - name: Run Tests
@@ -70,7 +73,7 @@ jobs:
 
       - name: Upload Allure Results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Update to v4
         with:
           name: allure-results
           path: allure-results/
