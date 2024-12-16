@@ -7,10 +7,15 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:  # This allows manual trigger
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        attempt: [1, 2, 3] # Retry job up to 3 times
 
     services:
       docker:
@@ -36,13 +41,19 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # Start Selenoid
-      - name: Start Docker Compose
-        run: docker-compose up -d
+      - name: Prepare Allure Results Directory
+        run: mkdir -p allure-results && touch allure-results/executor.json
 
-      # Wait for Selenoid to be ready
-      - name: Wait for Selenoid
-        run: until curl -sSf http://localhost:4444/status > /dev/null; do sleep 5; done
+      - name: Start Docker Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+
+
+      - name: Wait for All Services
+        run: |
+          for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
+            until curl -sSf $service > /dev/null; do sleep 5; done
+          done
 
       # Run WebdriverIO Tests
       - name: Run Tests
@@ -53,7 +64,13 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: npm run dock
 
-      # Post results to Slack
       - name: Notify Slack
         if: always()
         run: echo "Slack notification sent!"
+
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: allure-results/
