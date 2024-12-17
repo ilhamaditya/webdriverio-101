@@ -98,11 +98,12 @@ exports.config = {
     const axios = require("axios");
     const allureResultsPath = path.join(__dirname, "../allure-results");
 
-    // Generate executor.json for Allure report
+    // Ensure the directory exists
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
 
+    // Executor data (in executor.json)
     const executor = {
       name: "WebdriverIO Docker",
       type: "webdriverio",
@@ -117,6 +118,20 @@ exports.config = {
     );
     console.log("onComplete: Allure executor.json created.");
 
+    // Test results data (in test-results.json)
+    const testResults = {
+      totalTests: 0, // Replace with dynamic data from your actual results
+      failedTests: 0, // Replace with dynamic data from your actual results
+      errorTests: 0, // Replace with dynamic data from your actual results
+      totalDuration: "0:00:00", // Replace with dynamic data from your actual results
+    };
+
+    fs.writeFileSync(
+      path.join(allureResultsPath, "test-results.json"),
+      JSON.stringify(testResults, null, 2)
+    );
+    console.log("onComplete: Test results JSON created.");
+
     // Send Slack Notification
     const slackWebhook = process.env.SLACK_WEBHOOK;
     const reportUrl =
@@ -124,7 +139,7 @@ exports.config = {
     const statusMessage = exitCode === 0 ? "Success" : "Failure";
 
     const slackMessage = {
-      text: `*Test Execution Completed*: ${statusMessage}`,
+      text: `*Summary Result Test* :white_check_mark:\n\n*Total Tests:* ${testResults.totalTests}\n*Failed Tests:* ${testResults.failedTests}\n*Error Tests:* ${testResults.errorTests}\n*Total Duration:* ${testResults.totalDuration}\n\n*Allure Report*\n[Click to view the Allure report](${reportUrl})`,
       attachments: [
         {
           title: "Allure Report",
