@@ -1,38 +1,28 @@
+version: '3.9'
 services:
   selenoid:
     image: aerokube/selenoid:latest-release
     platform: linux/amd64
     volumes:
-      - "./config:/etc/selenoid"
-      - "./videos:/opt/selenoid/video"
-      - "./logs:/opt/selenoid/logs"
-      - "./config/browsers.json:/etc/selenoid/browsers.json"
+      - ./config:/etc/selenoid
+      - ./videos:/opt/selenoid/video
     ports:
-      - "4444:4444"
-    environment:
-      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
-      - OVERRIDE_LOG_OUTPUT_DIR=/opt/selenoid/logs
+      - 4444:4444
     restart: unless-stopped
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest-release
-    platform: linux/amd64
-    depends_on:
-      - selenoid
+    depends_on: [selenoid]
     ports:
-      - "8080:8080"
+      - 8080:8080
     environment:
-      - SELENOID_URI=http://selenoid:4444
+      SELENOID_URI: http://selenoid:4444
     restart: unless-stopped
 
   allure:
     image: frankescobar/allure-docker-service:latest
-    ports:
-      - "5050:5050"
     volumes:
-      - "./allure-results:/app/allure-results"
-      - "./allure-report:/app/allure-report"
-    environment:
-      - ALLURE_RESULT_PATH=/app/allure-results
-      - ALLURE_REPORT_PATH=/app/allure-report
+      - ./allure-results:/app/allure-results
+    ports:
+      - 5050:5050
     restart: unless-stopped

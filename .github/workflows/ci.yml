@@ -2,71 +2,45 @@ name: WebdriverIO CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-  workflow_dispatch:  # This allows manual trigger
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04  # Use a specific Ubuntu version
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        attempt: [1, 2, 3] # Retry job up to 3 times
-
-    services:
-      docker:
-        image: docker:latest
-        options: --privileged
-        ports:
-          - 4444:4444
-          - 8080:8080
-          - 5050:5050
+        attempt: [1, 2, 3]
 
     steps:
-      # Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Install Docker Compose
       - name: Install Docker Compose
         run: |
           curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
           chmod +x /usr/local/bin/docker-compose
-          docker-compose --version  # Verify the installation
 
-      # Install dependencies
       - name: Install Dependencies
         run: npm install
 
-      - name: Prepare Allure Results Directory
-        run: mkdir -p allure-results && touch allure-results/executor.json
+      - name: Start Required Services
+        run: docker-compose up -d
 
-      - name: Start Docker Compose
+      - name: Health Check - Services
         run: |
-          docker-compose -f docker-compose.yml up -d
+          curl --retry 5 --retry-delay 5 -s http://localhost:4444/status
+          curl --retry 5 --retry-delay 5 -s http://localhost:8080
 
-      - name: Wait for All Services
-        run: |
-          for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
-            until curl -sSf $service > /dev/null; do sleep 5; done
-          done
-
-      - name: Check Docker Compose status
-        run: |
-          docker-compose ps
-
-      # Run WebdriverIO Tests
-      - name: Run Tests
+      - name: Run WebdriverIO Tests
         env:
           WEB_URL: ${{ secrets.WEB_URL }}
           WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
@@ -74,13 +48,13 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: npm run dock
 
-      - name: Notify Slack
-        if: always()
-        run: echo "Slack notification sent!"
-
       - name: Upload Allure Results
         if: always()
-        uses: actions/upload-artifact@v4  # Update to v4
+        uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path: allure-results/
+
+      - name: Slack Notification
+        if: always()
+        run: echo "Slack notification sent!"
