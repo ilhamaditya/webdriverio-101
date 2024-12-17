@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean-allure-results": "find allure-results/ -type f ! -name 'executor.json' -exec rm -f {} \\;",
-    "wdio": "npx wdio run ./config/wdio.conf.js",
+    "wdio": "npx wdio run ./config/wdio.conf.local.js",
     "wdio:dock": "npx wdio run ./config/wdio.conf.dock.js",
     "allure-generate": "allure generate allure-results --clean",
     "allure-open": "allure open allure-report",
