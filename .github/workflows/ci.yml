@@ -2,54 +2,48 @@ name: WebdriverIO CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         attempt: [1, 2, 3]
 
     steps:
-      # Checkout the repository
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Setup Node.js
-      - name: Setup Node.js Environment
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Install Docker Compose
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
+      - name: Install Docker
+        uses: docker/setup-buildx-action@v2
 
-      # Install project dependencies
+      - name: Install Docker Compose
+        run: sudo apt-get install -y docker-compose
+
       - name: Install Dependencies
         run: npm install
 
-      # Start Docker containers for services
-      - name: Start Docker Services
+      - name: Create Allure Results Directory
+        run: mkdir -p allure-results
+
+      - name: Start Required Services
         run: docker-compose up -d
 
-      # Health check for services
       - name: Health Check - Services
         run: |
           curl --retry 5 --retry-delay 5 -s http://localhost:4444/status
           curl --retry 5 --retry-delay 5 -s http://localhost:8080
 
-      # Run WebdriverIO tests
       - name: Run WebdriverIO Tests
         env:
           WEB_URL: ${{ secrets.WEB_URL }}
@@ -58,7 +52,6 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: npm run dock
 
-      # Upload Allure results as artifacts
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,21 +59,6 @@ jobs:
           name: allure-results
           path: allure-results/
 
-      # Slack notification for results
-      - name: Send Slack Notification
+      - name: Slack Notification
         if: always()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          node -e "
-          const axios = require('axios');
-          const webhook = process.env.SLACK_WEBHOOK;
-          const message = {
-            text: 'WebdriverIO Test Suite Completed. Check the results and Allure report for more details.',
-          };
-          axios.post(webhook, message).then(() => {
-            console.log('Slack notification sent successfully.');
-          }).catch(err => {
-            console.error('Failed to send Slack notification:', err);
-          });
-          "
+        run: node ./config/waitForAllure.js
