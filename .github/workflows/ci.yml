@@ -55,12 +55,11 @@ jobs:
       # Stop and Remove Existing Containers if they're using the same ports
       - name: Stop and Remove Existing Containers
         run: |
-          # Stop and remove Selenoid container if it's already running
           docker ps -q --filter "name=selenoid" | xargs -I {} docker stop {}
           docker ps -aq --filter "name=selenoid" | xargs -I {} docker rm {}
-          # Stop and remove Allure container if it's already running
           docker ps -q --filter "name=allure" | xargs -I {} docker stop {}
           docker ps -aq --filter "name=allure" | xargs -I {} docker rm {}
+          docker-compose down  # Ensure any lingering containers are removed
 
       # Start Docker Compose
       - name: Start Docker Compose
