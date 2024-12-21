@@ -59,7 +59,7 @@ Berikut adalah struktur direktori utama proyek:
 ├── .github/workflows/ci.yml         # Konfigurasi GitHub Actions
 ├── config                           # Konfigurasi WebdriverIO & Docker
 │   ├── browsers.json                # Browser untuk Selenoid
-│   ├── wdio.conf.js                 # Konfigurasi lokal
+│   ├── wdio.conf.local.js           # Konfigurasi lokal
 │   ├── wdio.conf.dock.js            # Konfigurasi Docker
 │   ├── waitForAllure.js             # Script menunggu laporan Allure
 ├── docker-compose.yml               # Konfigurasi Docker untuk Selenoid dan Allure

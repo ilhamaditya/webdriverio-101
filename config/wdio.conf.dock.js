@@ -72,7 +72,6 @@ exports.config = {
     console.log("Running onPrepare hook...");
     // Prepare tasks before tests start (e.g., clean up reports, setup databases)
   },
-
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);
   },
@@ -84,28 +83,27 @@ exports.config = {
     }
     console.log(`Test finished: ${test.title}`);
   },
-
   beforeScenario: async function (scenario) {
     console.log(`Starting scenario: ${scenario.name}`);
   },
-
   afterScenario: async function (scenario) {
     console.log(`Finished scenario: ${scenario.name}`);
   },
 
   onComplete: async function (exitCode) {
     console.log("onComplete hook is triggered!");
-  
+
     const fs = require("fs");
     const path = require("path");
     const axios = require("axios");
     const allureResultsPath = path.join(__dirname, "../allure-results");
-  
-    // Generate executor.json for Allure report
+
+    // Ensure the directory exists
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
-  
+
+    // Executor data (in executor.json)
     const executor = {
       name: "WebdriverIO Docker",
       type: "webdriverio",
@@ -113,20 +111,35 @@ exports.config = {
       buildOrder: "1",
       reportName: "WebdriverIO Allure Report",
     };
-  
+
     fs.writeFileSync(
       path.join(allureResultsPath, "executor.json"),
       JSON.stringify(executor, null, 2)
     );
     console.log("onComplete: Allure executor.json created.");
-  
+
+    // Test results data (in test-results.json)
+    const testResults = {
+      totalTests: 0, // Replace with dynamic data from your actual results
+      failedTests: 0, // Replace with dynamic data from your actual results
+      errorTests: 0, // Replace with dynamic data from your actual results
+      totalDuration: "0:00:00", // Replace with dynamic data from your actual results
+    };
+
+    fs.writeFileSync(
+      path.join(allureResultsPath, "test-results.json"),
+      JSON.stringify(testResults, null, 2)
+    );
+    console.log("onComplete: Test results JSON created.");
+
     // Send Slack Notification
     const slackWebhook = process.env.SLACK_WEBHOOK;
-    const reportUrl = "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html";
+    const reportUrl =
+      "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html";
     const statusMessage = exitCode === 0 ? "Success" : "Failure";
-  
+
     const slackMessage = {
-      text: `*Test Execution Completed*: ${statusMessage}`,
+      text: `*Summary Result Test* :white_check_mark:\n\n*Total Tests:* ${testResults.totalTests}\n*Failed Tests:* ${testResults.failedTests}\n*Error Tests:* ${testResults.errorTests}\n*Total Duration:* ${testResults.totalDuration}\n\n*Allure Report*\n[Click to view the Allure report](${reportUrl})`,
       attachments: [
         {
           title: "Allure Report",
@@ -137,7 +150,7 @@ exports.config = {
         },
       ],
     };
-  
+
     try {
       await axios.post(slackWebhook, slackMessage);
       console.log("Slack notification sent successfully.");
