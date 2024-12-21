@@ -8,42 +8,47 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Use a specific Ubuntu version
+    strategy:
+      fail-fast: false
+      matrix:
+        attempt: [1, 2, 3] # Retry job up to 3 times
+
+    services:
+      docker:
+        image: docker:latest
+        options: --privileged
+        ports:
+          - 4444:4444
+          - 8080:8080
+          - 5050:5050
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: npm install
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Run WebdriverIO Tests
-      env:
-        WEB_URL: ${{ secrets.WEB_URL }}
-        WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
-        WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      run: npm run test
+      # Prepare Allure Results Directory
+      - name: Prepare Allure Results Directory
+        run: mkdir -p allure-results && touch allure-results/executor.json
 
-    - name: Generate Allure Report
-      run: npm run allure:generate
+      # Start Docker Compose
+      - name: Start Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d
 
-    - name: Upload Allure Report as Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: allure-report
-        path: allure-report/
-
-    - name: Notify Slack
-      if: always()
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      run: |
-        curl -X POST -H 'Content-type: application/json' \
-          --data '{"text":"WebdriverIO tests completed. Check the Allure report for details."}' \
-          $SLACK_WEBHOOK
+      # Wait for All Services
+      - name: Wait for All Services
+        run: |
+          for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
+    
