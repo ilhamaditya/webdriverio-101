@@ -52,12 +52,20 @@ jobs:
           chmod +x /usr/local/bin/docker-compose
           docker-compose --version  # Verify Docker Compose installation
 
+      # Stop and remove any existing containers that are using the same ports
+      - name: Stop and Remove Existing Containers
+        run: |
+          docker ps -q --filter "name=selenium" | xargs -I {} docker stop {}
+          docker ps -aq --filter "name=selenium" | xargs -I {} docker rm {}
+          docker ps -q --filter "name=allure" | xargs -I {} docker stop {}
+          docker ps -aq --filter "name=allure" | xargs -I {} docker rm {}
+
       # Start Docker Compose
       - name: Start Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      # Wait for All Services
+      # Wait for All Services to be up
       - name: Wait for All Services
         run: |
           for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
@@ -77,13 +85,21 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: npm run dock
 
+      # Notify Slack
       - name: Notify Slack
         if: always()
         run: echo "Slack notification sent!"
 
+      # Upload Allure Results
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4  # Update to v4
         with:
           name: allure-results
           path: allure-results/
+
+      # Clean up Docker Containers after Tests
+      - name: Clean Up Docker Containers
+        if: failure()
+        run: |
+          docker-compose down
