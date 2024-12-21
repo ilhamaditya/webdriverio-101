@@ -55,11 +55,14 @@ jobs:
       # Stop and Remove Existing Containers if they're using the same ports
       - name: Stop and Remove Existing Containers
         run: |
-          # Ensure all services are stopped and removed if they exist
-          docker ps -q --filter "name=selenoid" | xargs -r docker stop
-          docker ps -aq --filter "name=selenoid" | xargs -r docker rm
-          docker ps -q --filter "name=allure" | xargs -r docker stop
-          docker ps -aq --filter "name=allure" | xargs -r docker rm
+          # Check and stop containers using the required ports
+          for port in 4444 5050; do
+            container_id=$(docker ps -q --filter "expose=$port")
+            if [ ! -z "$container_id" ]; then
+              echo "Stopping container using port $port..."
+              docker stop $container_id && docker rm $container_id
+            fi
+          done
           docker-compose down --volumes --remove-orphans  # Ensure lingering containers are fully cleaned up
 
       # Start Docker Compose with retry logic
