@@ -41,19 +41,30 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      # Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      # Prepare Allure Results Directory
       - name: Prepare Allure Results Directory
         run: mkdir -p allure-results && touch allure-results/executor.json
 
+      # Start Docker Compose
       - name: Start Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
 
+      # Wait for All Services
       - name: Wait for All Services
         run: |
           for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
             until curl -sSf $service > /dev/null; do sleep 5; done
           done
 
+      # Check Docker Compose status
       - name: Check Docker Compose status
         run: |
           docker-compose ps
@@ -71,6 +82,7 @@ jobs:
         if: always()
         run: echo "Slack notification sent!"
 
+      # Upload Allure Results
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4  # Update to v4
