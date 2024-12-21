@@ -12,6 +12,16 @@ exports.config = {
         enableVnc: true,
         enableVideo: true,
         screenResolution: "1920x1080x24",
+        webdriverLogs: "/tmp/selenium.log",
+      },
+      "goog:chromeOptions": {
+        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // Updated Chrome binary path
+        args: [
+          "--no-sandbox",
+          // "--headless",
+          "--disable-dev-shm-usage",
+          "--remote-debugging-port=9222",
+        ],
       },
     },
   ],
