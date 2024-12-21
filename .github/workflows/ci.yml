@@ -1,10 +1,13 @@
-name: Run WebdriverIO Tests
+name: WebdriverIO CI/CD
 
 on:
   push:
     branches:
       - main
   pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # This allows manual trigger
 
 jobs:
   test:
@@ -38,17 +41,39 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # Prepare Allure Results Directory
       - name: Prepare Allure Results Directory
         run: mkdir -p allure-results && touch allure-results/executor.json
 
-      # Start Docker Compose
       - name: Start Docker Compose
         run: |
           docker-compose -f docker-compose.yml up -d
 
-      # Wait for All Services
       - name: Wait for All Services
         run: |
           for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
-    
+            until curl -sSf $service > /dev/null; do sleep 5; done
+          done
+
+      - name: Check Docker Compose status
+        run: |
+          docker-compose ps
+
+      # Run WebdriverIO Tests
+      - name: Run Tests
+        env:
+          WEB_URL: ${{ secrets.WEB_URL }}
+          WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
+          WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: npm run dock
+
+      - name: Notify Slack
+        if: always()
+        run: echo "Slack notification sent!"
+
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4  # Update to v4
+        with:
+          name: allure-results
+          path: allure-results/
