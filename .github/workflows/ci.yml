@@ -52,7 +52,7 @@ jobs:
           chmod +x /usr/local/bin/docker-compose
           docker-compose --version  # Verify Docker Compose installation
 
-      # Stop and remove any existing containers that are using the same ports
+      # Stop and Remove Existing Containers if they're using the same ports
       - name: Stop and Remove Existing Containers
         run: |
           docker ps -q --filter "name=selenium" | xargs -I {} docker stop {}
@@ -90,12 +90,12 @@ jobs:
         if: always()
         run: echo "Slack notification sent!"
 
-      # Upload Allure Results
+      # Upload Allure Results with a unique artifact name (timestamp)
       - name: Upload Allure Results
         if: always()
-        uses: actions/upload-artifact@v4  # Update to v4
+        uses: actions/upload-artifact@v4
         with:
-          name: allure-results
+          name: allure-results-${{ github.run_id }}  # Using run_id to ensure uniqueness
           path: allure-results/
 
       # Clean up Docker Containers after Tests
