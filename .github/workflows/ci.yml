@@ -55,8 +55,10 @@ jobs:
       # Stop and Remove Existing Containers if they're using the same ports
       - name: Stop and Remove Existing Containers
         run: |
-          docker ps -q --filter "name=selenium" | xargs -I {} docker stop {}
-          docker ps -aq --filter "name=selenium" | xargs -I {} docker rm {}
+          # Stop and remove Selenoid container if it's already running
+          docker ps -q --filter "name=selenoid" | xargs -I {} docker stop {}
+          docker ps -aq --filter "name=selenoid" | xargs -I {} docker rm {}
+          # Stop and remove Allure container if it's already running
           docker ps -q --filter "name=allure" | xargs -I {} docker stop {}
           docker ps -aq --filter "name=allure" | xargs -I {} docker rm {}
 
@@ -90,7 +92,7 @@ jobs:
         if: always()
         run: echo "Slack notification sent!"
 
-      # Upload Allure Results with a unique artifact name (timestamp)
+      # Upload Allure Results with a unique artifact name (run_id ensures uniqueness)
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
