@@ -13,13 +13,16 @@ exports.config = {
         enableVideo: true,
         screenResolution: "1920x1080x24",
         webdriverLogs: "/tmp/selenium.log",
-      },
-      "goog:chromeOptions": {
-        args: [
-          "--no-sandbox",
-          "--disable-dev-shm-usage",
-          "--remote-debugging-port=9222",
-        ],
+        chromeOptions: {
+          args: [
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--remote-debugging-port=9222",
+            "--disable-gpu", // Add this argument for stability
+            "--headless", // Run in headless mode for CI
+            "--window-size=1920x1080", // Ensure a fixed resolution
+          ],
+        },
       },
     },
   ],
@@ -37,12 +40,14 @@ exports.config = {
           hostname: "localhost",
           port: 4444,
           version: "latest",
+          baseURL: 'https://chromedriver.storage.googleapis.com',
         },
         debug: true,
         logging: true,
       },
     ],
   ],
+
   framework: "cucumber",
   reporters: [
     "spec",
