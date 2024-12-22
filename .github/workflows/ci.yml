@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:  # This allows manual trigger
+  workflow_dispatch:
 
 jobs:
   test:
@@ -20,7 +20,7 @@ jobs:
     services:
       docker:
         image: docker:latest
-        options: --privileged
+        options: --privileged --add-host=host.docker.internal:host-gateway
         ports:
           - 4444:4444
           - 8080:8080
@@ -66,20 +66,13 @@ jobs:
 
       # Start Docker Compose with retry logic
       - name: Start Docker Compose
-        run: |
-          attempts=5
-          until docker-compose -f docker-compose.yml up -d || [ $attempts -eq 0 ]; do
-            echo "Retrying Docker Compose start..."
-            ((attempts--))
-            sleep 5
-          done
+        run: docker-compose -f docker-compose.yml up -d
 
-      # Wait for All Services to be up (with retries for each service)
       - name: Wait for All Services
         run: |
           services=("http://localhost:4444/status" "http://localhost:8080" "http://localhost:5050")
           for service in "${services[@]}"; do
-            attempts=30
+            attempts=60
             until curl -sSf $service > /dev/null || [ $attempts -eq 0 ]; do
               echo "Waiting for $service to be up..."
               sleep 5
@@ -87,6 +80,7 @@ jobs:
             done
             if [ $attempts -eq 0 ]; then
               echo "Service $service failed to start!"
+              docker logs $(docker ps -q --filter "ancestor=aerokube/selenoid:latest-release") || true
               exit 1
             fi
           done
@@ -115,6 +109,5 @@ jobs:
 
       # Clean up Docker Containers after Tests
       - name: Clean Up Docker Containers
-        if: failure()
-        run: |
-          docker-compose down --volumes --remove-orphans
+        if: always()
+        run: docker-compose down --volumes --remove-orphans
