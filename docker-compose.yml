@@ -7,17 +7,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/etc/selenoid
       - ./videos:/opt/selenoid/video
-      - ./chrome:/opt/selenoid/chrome # Add this line for custom Chrome binaries if necessary
   ports:
     - 4444:4444
   environment:
     - TZ=Asia/Shanghai
-  command: [ "-limit", "5" ]
+  command: ["-limit", "5"]
   restart: unless-stopped
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest-release
-    depends_on: [ selenoid ]
+    depends_on: [selenoid]
     ports:
       - 8080:8080
     environment:
