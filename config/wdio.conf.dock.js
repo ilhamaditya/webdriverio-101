@@ -32,26 +32,14 @@ exports.config = {
     [
       "docker",
       {
-        containers: [
-          {
-            image: "selenoid/vnc:chrome_114.0",
-            hostname: "selenoid",
-            port: 4444,
-            path: "/wd/hub",
-            args: ["--shm-size=2g"], // Ensure args are properly set here
-          },
-        ],
+        image: "selenium/standalone-chrome", // Image name
         options: {
-          healthCheck: {
-            url: "http://localhost:4444/status",
-            maxRetries: 10,
-            inspectInterval: 1000,
-          },
-          protocol: "http",
           hostname: "localhost",
           port: 4444,
-          path: "/wd/hub",
+          version: "latest",
         },
+        debug: true,
+        logging: true,
       },
     ],
   ],
