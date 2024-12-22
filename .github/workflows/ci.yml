@@ -80,7 +80,6 @@ jobs:
             done
             if [ $attempts -eq 0 ]; then
               echo "Service $service failed to start!"
-              docker logs $(docker ps -q --filter "ancestor=aerokube/selenoid:latest-release") || true
               exit 1
             fi
           done

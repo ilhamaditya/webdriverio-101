@@ -15,10 +15,8 @@ exports.config = {
         webdriverLogs: "/tmp/selenium.log",
       },
       "goog:chromeOptions": {
-        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // Updated Chrome binary path
         args: [
           "--no-sandbox",
-          // "--headless",
           "--disable-dev-shm-usage",
           "--remote-debugging-port=9222",
         ],
@@ -37,13 +35,16 @@ exports.config = {
         containers: [
           {
             image: "selenoid/vnc:chrome_114.0",
+            hostname: "selenoid",
+            port: 4444,
+            path: "/wd/hub",
             args: ["--shm-size=2g"], // Ensure args are properly set here
           },
         ],
         options: {
           healthCheck: {
             url: "http://localhost:4444/status",
-            maxRetries: 3,
+            maxRetries: 10,
             inspectInterval: 1000,
           },
           protocol: "http",
