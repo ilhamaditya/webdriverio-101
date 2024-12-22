@@ -11,7 +11,7 @@ services:
       - 4444:4444
     environment:
       - TZ=Asia/Shanghai
-    command: ["-limit", "5", "-disable-vnc", "-disable-video"]  # Fixed options
+    command: ["-limit", "5"]  # Removed -disable-vnc flag
     restart: unless-stopped
 
   selenoid-ui:
