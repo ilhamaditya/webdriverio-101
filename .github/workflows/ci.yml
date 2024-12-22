@@ -76,8 +76,19 @@ jobs:
 
       # Start Docker Compose with retry logic
       - name: Start Docker Compose
-        run: docker-compose -f docker-compose.yml up -d
+        run: |
+          attempts=3
+          until docker-compose -f docker-compose.yml up -d || [ $attempts -eq 0 ]; do
+            echo "Retrying to start Docker Compose..."
+            sleep 10
+            ((attempts--))
+          done
+          if [ $attempts -eq 0 ]; then
+            echo "Docker Compose failed to start after 3 attempts!"
+            exit 1
+          fi
 
+      # Wait for All Services with retry logic
       - name: Wait for All Services
         run: |
           services=("http://localhost:4444/status" "http://localhost:8080" "http://localhost:5050")
@@ -94,14 +105,24 @@ jobs:
             fi
           done
 
-      # Run WebdriverIO Tests
+      # Run WebdriverIO Tests with retry logic
       - name: Run Tests
         env:
           WEB_URL: ${{ secrets.WEB_URL }}
           WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
           WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: npm run dock
+        run: |
+          attempts=3
+          until npm run dock || [ $attempts -eq 0 ]; do
+            echo "Retrying WebdriverIO tests..."
+            sleep 10
+            ((attempts--))
+          done
+          if [ $attempts -eq 0 ]; then
+            echo "WebdriverIO tests failed after 3 attempts!"
+            exit 1
+          fi
 
       # Debug Environment Variables
       - name: Debug Environment Variables
