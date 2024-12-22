@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        attempt: [1, 2, 3] # Retry job up to 3 times
+        attempt: [1, 2, 3]  # Retry job up to 3 times
 
     services:
       docker:
@@ -94,10 +94,19 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: npm run dock
 
+      # Debug Environment Variables
+      - name: Debug Environment Variables
+        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
+
       # Notify Slack
       - name: Notify Slack
         if: always()
-        run: echo "Slack notification sent!"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"Test workflow completed. Check Allure results for details!"}' \
+          $SLACK_WEBHOOK
 
       # Upload Allure Results
       - name: Upload Allure Results
