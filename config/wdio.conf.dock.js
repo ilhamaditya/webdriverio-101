@@ -10,10 +10,12 @@ exports.config = {
       browserName: "chrome",
       "goog:chromeOptions": {
         args: [
+          // "--headless", // Run in headless mode (important for CI)
           "--no-sandbox", // Disable sandboxing in Docker
           "--disable-dev-shm-usage", // Ensure Chrome runs properly in low-memory containers
           "--disable-gpu", // Disable GPU acceleration
           "--remote-debugging-port=9222", // Remote debugging port
+          "--remote-debugging-address=0.0.0.0", // Allow external connections to debugging port
         ],
       },
       "selenoid:options": {
@@ -33,18 +35,17 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome", // Image name
+        image: "selenium/standalone-chrome:latest", // Ensure the image is the latest
         options: {
           hostname: "localhost",
           port: 4444,
-          version: "latest",
+          version: "latest", // Ensure the latest version is used
         },
         debug: true,
         logging: true,
       },
     ],
   ],
-
   framework: "cucumber",
   reporters: [
     "spec",
@@ -76,7 +77,6 @@ exports.config = {
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);
   },
-
   afterTest: async function (test) {
     if (test.error) {
       console.log(`Test failed: ${test.title}`);
@@ -90,7 +90,6 @@ exports.config = {
   afterScenario: async function (scenario) {
     console.log(`Finished scenario: ${scenario.name}`);
   },
-
   onComplete: async function (exitCode) {
     console.log("onComplete hook is triggered!");
 
@@ -121,10 +120,10 @@ exports.config = {
 
     // Test results data (in test-results.json)
     const testResults = {
-      totalTests: 0, // Replace with dynamic data from your actual results
-      failedTests: 0, // Replace with dynamic data from your actual results
-      errorTests: 0, // Replace with dynamic data from your actual results
-      totalDuration: "0:00:00", // Replace with dynamic data from your actual results
+      totalTests: 0,
+      failedTests: 0,
+      errorTests: 0,
+      totalDuration: "0:00:00",
     };
 
     fs.writeFileSync(
