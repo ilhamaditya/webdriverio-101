@@ -19,6 +19,7 @@ services:
       - SCREEN_DEPTH=24       # Set screen color depth (optional)
     command: ["-limit", "5"]
     restart: unless-stopped
+    shm_size: 2g
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest-release
