@@ -8,18 +8,19 @@ exports.config = {
   capabilities: [
     {
       browserName: "chrome",
+      "goog:chromeOptions": {
+        args: [
+          "--no-sandbox", // Disable sandboxing in Docker
+          "--disable-dev-shm-usage", // Ensure Chrome runs properly in low-memory containers
+          "--disable-gpu", // Disable GPU acceleration
+          "--remote-debugging-port=9222", // Remote debugging port
+        ],
+      },
       "selenoid:options": {
-        enableVnc: true,
-        enableVideo: true,
-        screenResolution: "1920x1080x24",
+        enableVnc: true, // Enable VNC to view the browser
+        enableVideo: true, // Enable video recording (optional)
+        screenResolution: "1920x1080x24", // Screen resolution for the display
         webdriverLogs: "/tmp/selenium.log",
-        chromeOptions: {
-          args: [
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--remote-debugging-port=9222",
-          ],
-        },
       },
     },
   ],
