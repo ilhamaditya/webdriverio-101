@@ -7,18 +7,19 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/etc/selenoid
       - ./videos:/opt/selenoid/video
-  ports:
-    - 4444:4444
-  environment:
-    - TZ=Asia/Shanghai
-  command: ["-limit", "5"]
-  restart: unless-stopped
+    ports:
+      - "4444:4444"  # Fix: moved under service
+    environment:
+      - TZ=Asia/Shanghai
+    command: ["-limit", "5"]
+    restart: unless-stopped
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest-release
-    depends_on: [selenoid]
+    depends_on: 
+      - selenoid
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       SELENOID_URI: http://host.docker.internal:4444
     restart: unless-stopped
@@ -28,5 +29,5 @@ services:
     volumes:
       - ./allure-results:/app/allure-results
     ports:
-      - 5050:5050
+      - "5050:5050"
     restart: unless-stopped
