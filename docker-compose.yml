@@ -7,21 +7,25 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/etc/selenoid
       - ./videos:/opt/selenoid/video
+      - ./logs:/opt/selenoid/logs
     ports:
-      - "4444:4444"  # Fix: moved under service
+      - "4444:4444"
     environment:
       - TZ=Asia/Shanghai
-    command: ["-limit", "5"]
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
+      - OVERRIDE_LOGS_DIR=/opt/selenoid/logs
+      - ENABLE_LOG=true
+    command: ["-limit", "5", "-log-output-dir", "/opt/selenoid/logs", "-capture-logs"]
     restart: unless-stopped
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest-release
-    depends_on: 
+    depends_on:
       - selenoid
     ports:
       - "8080:8080"
     environment:
-      SELENOID_URI: http://host.docker.internal:4444
+      SELENOID_URI: http://selenoid:4444
     restart: unless-stopped
 
   allure:
