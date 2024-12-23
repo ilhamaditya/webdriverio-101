@@ -32,14 +32,16 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome", // Image name
+        image: "aerokube/selenoid:latest-release", // Use the correct image for Selenoid
+        healthCheck: "http://localhost:4444/status", // Ensure Docker health checks are set up
         options: {
-          hostname: "localhost",
+          hostname: "localhost", // Ensure this matches your Docker setup
           port: 4444,
-          version: "latest",
+          args: {
+            "-limit": 5, // Selenoid limit for concurrent sessions
+            "-enable-file-upload": true, 
+          },
         },
-        debug: true,
-        logging: true,
       },
     ],
   ],
