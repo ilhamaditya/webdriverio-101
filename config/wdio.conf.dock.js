@@ -12,6 +12,14 @@ exports.config = {
         enableVnc: true,
         enableVideo: true,
         screenResolution: "1920x1080x24",
+        webdriverLogs: "/tmp/selenium.log",
+        chromeOptions: {
+          args: [
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--remote-debugging-port=9222",
+          ],
+        },
       },
     },
   ],
@@ -24,26 +32,18 @@ exports.config = {
     [
       "docker",
       {
-        containers: [
-          {
-            image: "selenoid/vnc:chrome_114.0",
-            args: ["--shm-size=2g"], // Ensure args are properly set here
-          },
-        ],
+        image: "selenium/standalone-chrome", // Image name
         options: {
-          healthCheck: {
-            url: "http://localhost:4444/status",
-            maxRetries: 3,
-            inspectInterval: 1000,
-          },
-          protocol: "http",
           hostname: "localhost",
           port: 4444,
-          path: "/wd/hub",
+          version: "latest",
         },
+        debug: true,
+        logging: true,
       },
     ],
   ],
+
   framework: "cucumber",
   reporters: [
     "spec",

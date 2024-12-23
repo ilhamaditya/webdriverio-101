@@ -5,7 +5,8 @@
       "114.0": {
         "image": "selenoid/vnc:chrome_114.0",
         "port": "4444",
-        "path": "/"
+        "path": "/wd/hub",
+        "args": ["--shm-size=2g"]
       }
     }
   }

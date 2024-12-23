@@ -7,24 +7,26 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:  # This allows manual trigger
+  workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04  # Use a specific Ubuntu version
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        attempt: [1, 2, 3] # Retry job up to 3 times
+        attempt: [1, 2, 3]  # Retry job up to 3 times
 
     services:
       docker:
         image: docker:latest
-        options: --privileged
+        options: --privileged --add-host=host.docker.internal:host-gateway
         ports:
           - 4444:4444
           - 8080:8080
           - 5050:5050
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
 
     steps:
       # Checkout the code
@@ -41,39 +43,110 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      # Set environment variables for services
+      - name: Set Up Environment Variables
+        run: |
+          echo "WEB_URL=$WEB_URL" >> $GITHUB_ENV
+          echo "WEB_USERNAME=$WEB_USERNAME" >> $GITHUB_ENV
+          echo "WEB_PASSWORD=$WEB_PASSWORD" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
+
+      # Prepare Allure Results Directory
       - name: Prepare Allure Results Directory
         run: mkdir -p allure-results && touch allure-results/executor.json
 
+      # Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      # Stop and Remove Existing Containers
+      - name: Stop and Remove Existing Containers
+        run: |
+          for port in 4444 5050; do
+            container_id=$(docker ps -q --filter "expose=$port")
+            if [ ! -z "$container_id" ]; then
+              echo "Stopping container using port $port..."
+              docker stop $container_id && docker rm $container_id
+            fi
+          done
+          docker-compose down --volumes --remove-orphans
+
+      # Start Docker Compose with retry logic
       - name: Start Docker Compose
         run: |
-          docker-compose -f docker-compose.yml up -d
+          attempts=3
+          until docker-compose -f docker-compose.yml up -d || [ $attempts -eq 0 ]; do
+            echo "Retrying to start Docker Compose..."
+            sleep 10
+            ((attempts--))
+          done
+          if [ $attempts -eq 0 ]; then
+            echo "Docker Compose failed to start after 3 attempts!"
+            exit 1
+          fi
 
+      # Wait for All Services with retry logic
       - name: Wait for All Services
         run: |
-          for service in http://localhost:4444/status http://localhost:8080 http://localhost:5050; do
-            until curl -sSf $service > /dev/null; do sleep 5; done
+          services=("http://localhost:4444/status" "http://localhost:8080" "http://localhost:5050")
+          for service in "${services[@]}"; do
+            attempts=60
+            until curl -sSf $service > /dev/null || [ $attempts -eq 0 ]; do
+              echo "Waiting for $service to be up..."
+              sleep 5
+              ((attempts--))
+            done
+            if [ $attempts -eq 0 ]; then
+              echo "Service $service failed to start!"
+              exit 1
+            fi
           done
 
-      - name: Check Docker Compose status
-        run: |
-          docker-compose ps
-
-      # Run WebdriverIO Tests
+      # Run WebdriverIO Tests with retry logic
       - name: Run Tests
         env:
           WEB_URL: ${{ secrets.WEB_URL }}
           WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
           WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: npm run dock
+        run: |
+          attempts=3
+          until npm run dock || [ $attempts -eq 0 ]; do
+            echo "Retrying WebdriverIO tests..."
+            sleep 10
+            ((attempts--))
+          done
+          if [ $attempts -eq 0 ]; then
+            echo "WebdriverIO tests failed after 3 attempts!"
+            exit 1
+          fi
 
+      # Debug Environment Variables
+      - name: Debug Environment Variables
+        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
+
+      # Notify Slack
       - name: Notify Slack
         if: always()
-        run: echo "Slack notification sent!"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"Test workflow completed. Check Allure results for details!"}' \
+          $SLACK_WEBHOOK
 
+      # Upload Allure Results
       - name: Upload Allure Results
         if: always()
-        uses: actions/upload-artifact@v4  # Update to v4
+        uses: actions/upload-artifact@v4
         with:
-          name: allure-results
+          name: allure-results-${{ github.run_id }}
           path: allure-results/
+
+      # Clean up Docker Containers after Tests
+      - name: Clean Up Docker Containers
+        if: always()
+        run: docker-compose down --volumes --remove-orphans
