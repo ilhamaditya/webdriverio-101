@@ -1,22 +1,16 @@
 version: '3.9'
 services:
   selenoid:
-    image: aerokube/selenoid:latest-release
+    image: selenoid/selenoid:latest
     platform: linux/amd64
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config:/etc/selenoid
-      - ./videos:/opt/selenoid/video
+      - /tmp/selenoid/video:/opt/selenoid/video
     ports:
       - "4444:4444"  # Expose Selenoid port
       - "5900:5900"  # Expose VNC port
     environment:
-      - TZ=Asia/Shanghai
-      - ENABLE_VNC=true       # Enable VNC for GUI access
-      - VNC_PASSWORD=secret   # Set the VNC password for remote viewing
-      - SCREEN_WIDTH=1920     # Set screen resolution width (optional)
-      - SCREEN_HEIGHT=1080    # Set screen resolution height (optional)
-      - SCREEN_DEPTH=24       # Set screen color depth (optional)
+      - TZ=UTC
     command: ["-limit", "5"]
     restart: unless-stopped
 

@@ -19,7 +19,7 @@ jobs:
 
     services:
       docker:
-        image: docker:latest
+        image: selenoid/selenoid:latest
         options: --privileged --add-host=host.docker.internal:host-gateway
         ports:
           - 4444:4444
