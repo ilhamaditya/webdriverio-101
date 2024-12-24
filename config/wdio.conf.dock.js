@@ -7,26 +7,27 @@ exports.config = {
   maxInstances: 3,
   capabilities: [
     {
-      browserName: "chrome",
-      "goog:chromeOptions": {
+      browserName: 'chrome',
+      'goog:chromeOptions': {
+        binary: '/usr/local/bin/google-chrome',
         args: [
-          // "--headless", // Run in headless mode (important for CI)
-          "--no-sandbox", // Disable sandboxing in Docker
-          "--disable-dev-shm-usage", // Ensure Chrome runs properly in low-memory containers
-          "--disable-gpu", // Disable GPU acceleration
-          "--remote-debugging-port=9222", // Remote debugging port
-          "--remote-debugging-address=0.0.0.0", // Allow external connections to debugging port
-        ],
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          // '--headless'
+          '--remote-debugging-port=9222',
+          '--remote-debugging-address=0.0.0.0'
+        ]
       },
-      "selenoid:options": {
-        enableVnc: true, // Enable VNC to view the browser
-        enableVideo: true, // Enable video recording (optional)
-        screenResolution: "1920x1080x24", // Screen resolution for the display
-        webdriverLogs: "/tmp/selenium.log",
-      },
-    },
+      'selenoid:options': {
+        enableVnc: true,
+        enableVideo: true,
+        screenResolution: '1920x1080x24',
+        webdriverLogs: '/tmp/selenium.log'
+      }
+    }
   ],
-  logLevel: "info",
+  logLevel: "debug",
   bail: 0,
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
