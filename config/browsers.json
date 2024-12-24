@@ -6,7 +6,11 @@
         "image": "selenoid/vnc:chrome_114.0",
         "port": "4444",
         "path": "/wd/hub",
-        "args": ["--shm-size=2g"]
+        "args": [
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu"
+        ]
       }
     }
   }
