@@ -7,26 +7,26 @@ exports.config = {
   maxInstances: 3,
   capabilities: [
     {
-      browserName: 'chrome',
-      'goog:chromeOptions': {
+      browserName: "chrome",
+      "goog:chromeOptions": {
         args: [
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          // '--headless'
-          '--remote-debugging-port=9222',
-          '--remote-debugging-address=0.0.0.0'
-        ]
+          "--headless", // Ensure Chrome runs headless for CI
+          "--no-sandbox", // Disable sandboxing in Docker
+          "--disable-dev-shm-usage", // Ensure Chrome runs properly in low-memory containers
+          "--disable-gpu", // Disable GPU acceleration
+          "--remote-debugging-port=9222", // Remote debugging port
+          "--remote-debugging-address=0.0.0.0", // Allow external connections to debugging port
+        ],
       },
-      'selenoid:options': {
-        enableVnc: true,
-        enableVideo: true,
-        screenResolution: '1920x1080x24',
-        webdriverLogs: '/tmp/selenium.log'
-      }
-    }
+      "selenoid:options": {
+        enableVnc: true, // Enable VNC to view the browser
+        enableVideo: true, // Enable video recording (optional)
+        screenResolution: "1920x1080x24", // Screen resolution for the display
+        webdriverLogs: "/tmp/selenium.log",
+      },
+    },
   ],
-  logLevel: "debug",
+  logLevel: "info",
   bail: 0,
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
@@ -72,7 +72,6 @@ exports.config = {
   // Hooks
   onPrepare: function (config, capabilities) {
     console.log("Running onPrepare hook...");
-    // Prepare tasks before tests start (e.g., clean up reports, setup databases)
   },
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);

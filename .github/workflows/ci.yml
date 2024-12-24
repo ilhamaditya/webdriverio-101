@@ -38,13 +38,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      
-      # Install Chrome and WebDriver
-      - name: Install Chrome and WebDriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          google-chrome --version
 
       # Install dependencies
       - name: Install Dependencies
@@ -130,10 +123,6 @@ jobs:
             echo "WebdriverIO tests failed after 3 attempts!"
             exit 1
           fi
-
-      # Debug Environment Variables
-      - name: Debug Environment Variables
-        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
 
       # Notify Slack
       - name: Notify Slack
