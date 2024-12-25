@@ -13,7 +13,6 @@ exports.config = {
           '--no-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
-          // '--headless'
           '--remote-debugging-port=9222',
           '--remote-debugging-address=0.0.0.0'
         ]
@@ -39,7 +38,8 @@ exports.config = {
         options: {
           hostname: "localhost",
           port: 4444,
-          version: "latest", // Ensure the latest version is used
+          path: "/wd/hub",
+          args: [], // Ensure args is defined
         },
         debug: true,
         logging: true,
@@ -96,7 +96,7 @@ exports.config = {
     const fs = require("fs");
     const path = require("path");
     const axios = require("axios");
-    const allureResultsPath = path.join(__dirname, "../allure-results");
+    const allureResultsPath = path.resolve(__dirname, "../allure-results");
 
     // Ensure the directory exists
     if (!fs.existsSync(allureResultsPath)) {
@@ -113,7 +113,7 @@ exports.config = {
     };
 
     fs.writeFileSync(
-      path.join(allureResultsPath, "executor.json"),
+      path.resolve(allureResultsPath, "executor.json"),
       JSON.stringify(executor, null, 2)
     );
     console.log("onComplete: Allure executor.json created.");
@@ -127,7 +127,7 @@ exports.config = {
     };
 
     fs.writeFileSync(
-      path.join(allureResultsPath, "test-results.json"),
+      path.resolve(allureResultsPath, "test-results.json"),
       JSON.stringify(testResults, null, 2)
     );
     console.log("onComplete: Test results JSON created.");
