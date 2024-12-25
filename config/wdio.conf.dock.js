@@ -7,26 +7,14 @@ exports.config = {
   maxInstances: 3,
   capabilities: [
     {
-      browserName: 'chrome',
-      'goog:chromeOptions': {
-        args: [
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          // '--headless'
-          '--remote-debugging-port=9222',
-          '--remote-debugging-address=0.0.0.0'
-        ]
+      browserName: "chrome",
+      "goog:chromeOptions": {
+        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // Correct path
+        args: ["--no-sandbox", "--disable-gpu"], // Optional flags
       },
-      'selenoid:options': {
-        enableVnc: true,
-        enableVideo: true,
-        screenResolution: '1920x1080x24',
-        webdriverLogs: '/tmp/selenium.log'
-      }
-    }
+    },
   ],
-  logLevel: "debug",
+  logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
@@ -35,14 +23,11 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome:latest", // Ensure the image is the latest
         options: {
-          hostname: "localhost",
-          port: 4444,
-          version: "latest", // Ensure the latest version is used
+          image: "selenoid/chrome:latest",
+          healthCheck: "http://localhost:4444/wd/hub/status",
+          args: ["-debug"], // Add or modify args as required
         },
-        debug: true,
-        logging: true,
       },
     ],
   ],
