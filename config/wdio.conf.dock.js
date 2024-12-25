@@ -9,7 +9,14 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        w3c: true,
+        binary: "/usr/bin/google-chrome", // Ensure this is correct for your Docker environment
+        args: [
+          // "--headless", // Run in headless mode
+          "--no-sandbox", // Disable sandboxing (necessary for Docker)
+          "--disable-dev-shm-usage", // Overcome memory issues in Docker
+          "--disable-gpu", // Disable GPU acceleration
+          "--window-size=1280x1024", // Set a window size (important for headless mode)
+        ],
       },
     },
   ],
