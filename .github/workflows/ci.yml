@@ -50,12 +50,6 @@ jobs:
       - name: Prepare Allure Results Directory
         run: mkdir -p allure-results && touch allure-results/executor.json
 
-      - name: Install Docker Compose
-        run: |
-          curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
-
       - name: Stop and Remove Existing Containers
         run: |
           for port in 4444 5050; do
@@ -113,9 +107,6 @@ jobs:
             echo "WebdriverIO tests failed after 3 attempts!"
             exit 1
           fi
-
-      - name: Debug Environment Variables
-        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
 
       - name: Notify Slack
         if: always()
