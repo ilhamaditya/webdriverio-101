@@ -9,11 +9,12 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // Correct path
-        args: ["--no-sandbox", "--disable-gpu"], // Optional flags
+        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        args: ["--no-sandbox", "--disable-gpu"],
       },
     },
   ],
+
   logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
