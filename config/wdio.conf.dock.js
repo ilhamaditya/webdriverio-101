@@ -9,16 +9,18 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        binary: "/usr/bin/chromium", // Update to container's Chrome path
+        binary: "/usr/bin/google-chrome", // Ensure this is correct for your Docker environment
         args: [
-          "--no-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-          "--window-size=1280x1024",
+          // "--headless", // Run in headless mode
+          "--no-sandbox", // Disable sandboxing (necessary for Docker)
+          "--disable-dev-shm-usage", // Overcome memory issues in Docker
+          "--disable-gpu", // Disable GPU acceleration
+          "--window-size=1280x1024", // Set a window size (important for headless mode)
         ],
       },
     },
   ],
+
   logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
@@ -28,7 +30,7 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome:114.0", // Use a stable version for compatibility
+        image: "selenium/standalone-chrome:latest", // Ensure you use the right image
         options: {
           version: "latest",
           port: 4444,
@@ -60,8 +62,10 @@ exports.config = {
     timeout: 60000,
     ignoreUndefinedDefinitions: false,
   },
+  // Hooks
   onPrepare: function (config, capabilities) {
     console.log("Running onPrepare hook...");
+    // Prepare tasks before tests start (e.g., clean up reports, setup databases)
   },
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);
@@ -81,15 +85,18 @@ exports.config = {
   },
   onComplete: async function (exitCode) {
     console.log("onComplete hook is triggered!");
+
     const fs = require("fs");
     const path = require("path");
     const axios = require("axios");
     const allureResultsPath = path.join(__dirname, "../allure-results");
 
+    // Ensure the directory exists
     if (!fs.existsSync(allureResultsPath)) {
       fs.mkdirSync(allureResultsPath);
     }
 
+    // Executor data (in executor.json)
     const executor = {
       name: "WebdriverIO Docker",
       type: "webdriverio",
@@ -98,9 +105,13 @@ exports.config = {
       reportName: "WebdriverIO Allure Report",
     };
 
-    fs.writeFileSync(path.join(allureResultsPath, "executor.json"), JSON.stringify(executor, null, 2));
+    fs.writeFileSync(
+      path.join(allureResultsPath, "executor.json"),
+      JSON.stringify(executor, null, 2)
+    );
     console.log("onComplete: Allure executor.json created.");
 
+    // Test results data (in test-results.json)
     const testResults = {
       totalTests: 0,
       failedTests: 0,
@@ -108,11 +119,16 @@ exports.config = {
       totalDuration: "0:00:00",
     };
 
-    fs.writeFileSync(path.join(allureResultsPath, "test-results.json"), JSON.stringify(testResults, null, 2));
+    fs.writeFileSync(
+      path.join(allureResultsPath, "test-results.json"),
+      JSON.stringify(testResults, null, 2)
+    );
     console.log("onComplete: Test results JSON created.");
 
+    // Send Slack Notification
     const slackWebhook = process.env.SLACK_WEBHOOK;
-    const reportUrl = "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html";
+    const reportUrl =
+      "http://localhost:5050/allure-docker-service/projects/default/reports/latest/index.html";
     const statusMessage = exitCode === 0 ? "Success" : "Failure";
 
     const slackMessage = {
@@ -135,4 +151,7 @@ exports.config = {
       console.error("Error sending Slack notification:", error.message);
     }
   },
+  // Retry Mechanism
+  maxRetries: 3,
+  retry: 2,
 };
