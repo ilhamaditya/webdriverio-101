@@ -9,8 +9,7 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        binary: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-        args: ["--no-sandbox", "--disable-gpu"],
+        w3c: true,
       },
     },
   ],
@@ -24,11 +23,13 @@ exports.config = {
     [
       "docker",
       {
+        image: "selenium/standalone-chrome", // Ensure you use the right image
         options: {
-          image: "selenoid/chrome:latest",
-          healthCheck: "http://localhost:4444/wd/hub/status",
-          args: ["-debug"], // Add or modify args as required
+          // Customize options if needed
+          version: "latest",
+          port: 4444,
         },
+        volumes: ["/var/run/docker.sock:/var/run/docker.sock"],
       },
     ],
   ],
