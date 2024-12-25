@@ -23,9 +23,8 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome", // Ensure you use the right image
+        image: "selenium/standalone-chrome:latest", // Ensure you use the right image
         options: {
-          // Customize options if needed
           version: "latest",
           port: 4444,
         },

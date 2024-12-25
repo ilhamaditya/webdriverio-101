@@ -29,21 +29,17 @@ jobs:
           - /var/run/docker.sock:/var/run/docker.sock
 
     steps:
-      # Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Install dependencies
       - name: Install Dependencies
         run: npm install
 
-      # Set environment variables for services
       - name: Set Up Environment Variables
         run: |
           echo "WEB_URL=$WEB_URL" >> $GITHUB_ENV
@@ -51,18 +47,15 @@ jobs:
           echo "WEB_PASSWORD=$WEB_PASSWORD" >> $GITHUB_ENV
           echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
 
-      # Prepare Allure Results Directory
       - name: Prepare Allure Results Directory
         run: mkdir -p allure-results && touch allure-results/executor.json
 
-      # Install Docker Compose
       - name: Install Docker Compose
         run: |
           curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
-      # Stop and Remove Existing Containers
       - name: Stop and Remove Existing Containers
         run: |
           for port in 4444 5050; do
@@ -74,7 +67,6 @@ jobs:
           done
           docker-compose down --volumes --remove-orphans
 
-      # Start Docker Compose with retry logic
       - name: Start Docker Compose
         run: |
           attempts=3
@@ -88,7 +80,6 @@ jobs:
             exit 1
           fi
 
-      # Wait for All Services with retry logic
       - name: Wait for All Services
         run: |
           services=("http://localhost:4444/status" "http://localhost:8080" "http://localhost:5050")
@@ -105,7 +96,6 @@ jobs:
             fi
           done
 
-      # Run WebdriverIO Tests with retry logic
       - name: Run Tests
         env:
           WEB_URL: ${{ secrets.WEB_URL }}
@@ -124,11 +114,9 @@ jobs:
             exit 1
           fi
 
-      # Debug Environment Variables
       - name: Debug Environment Variables
         run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
 
-      # Notify Slack
       - name: Notify Slack
         if: always()
         env:
@@ -138,7 +126,6 @@ jobs:
           --data '{"text":"Test workflow completed. Check Allure results for details!"}' \
           $SLACK_WEBHOOK
 
-      # Upload Allure Results
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -146,7 +133,6 @@ jobs:
           name: allure-results-${{ github.run_id }}
           path: allure-results/
 
-      # Clean up Docker Containers after Tests
       - name: Clean Up Docker Containers
         if: always()
         run: docker-compose down --volumes --remove-orphans
