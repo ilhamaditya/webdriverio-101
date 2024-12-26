@@ -8,22 +8,21 @@ exports.config = {
   capabilities: [
     {
       browserName: "chrome",
-      "selenoid:options": {
-        enableVnc: true,
-        enableVideo: true,
-        screenResolution: "1920x1080x24",
-        webdriverLogs: "/tmp/selenium.log",
-        chromeOptions: {
-          args: [
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--remote-debugging-port=9222",
-          ],
-        },
+      "goog:chromeOptions": {
+        // Remove the local path to Chrome and rely on the Docker container
+        args: [
+          "--headless", // Ensure headless mode
+          "--no-sandbox", // Disable the sandbox for Docker environments
+          "--disable-dev-shm-usage", // Overcome Docker limitations
+          "--disable-gpu", // Disable GPU for headless mode
+          "--window-size=1280x1024", // Set window size for consistent rendering
+          "--remote-debugging-port=9222", // Enable remote debugging
+        ],
       },
     },
   ],
-  logLevel: "info",
+
+  logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
   connectionRetryTimeout: 120000,
@@ -32,18 +31,15 @@ exports.config = {
     [
       "docker",
       {
-        image: "selenium/standalone-chrome", // Image name
+        image: "selenium/standalone-chrome:latest", // Ensure you use the right image
         options: {
-          hostname: "localhost",
-          port: 4444,
           version: "latest",
+          port: 4444,
         },
-        debug: true,
-        logging: true,
+        volumes: ["/var/run/docker.sock:/var/run/docker.sock"],
       },
     ],
   ],
-
   framework: "cucumber",
   reporters: [
     "spec",
@@ -75,7 +71,6 @@ exports.config = {
   beforeTest: async function (test) {
     console.log(`Starting test: ${test.title}`);
   },
-
   afterTest: async function (test) {
     if (test.error) {
       console.log(`Test failed: ${test.title}`);
@@ -89,7 +84,6 @@ exports.config = {
   afterScenario: async function (scenario) {
     console.log(`Finished scenario: ${scenario.name}`);
   },
-
   onComplete: async function (exitCode) {
     console.log("onComplete hook is triggered!");
 
@@ -120,10 +114,10 @@ exports.config = {
 
     // Test results data (in test-results.json)
     const testResults = {
-      totalTests: 0, // Replace with dynamic data from your actual results
-      failedTests: 0, // Replace with dynamic data from your actual results
-      errorTests: 0, // Replace with dynamic data from your actual results
-      totalDuration: "0:00:00", // Replace with dynamic data from your actual results
+      totalTests: 0,
+      failedTests: 0,
+      errorTests: 0,
+      totalDuration: "0:00:00",
     };
 
     fs.writeFileSync(

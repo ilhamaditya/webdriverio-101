@@ -25,6 +25,7 @@
     "@wdio/local-runner": "^9.2.11",
     "@wdio/selenium-standalone-service": "^8.14.0",
     "@wdio/spec-reporter": "^9.2.8",
+    "chromedriver": "^131.0.4",
     "wdio-cucumber-viewport-logger-service": "^2.1.36-alpha.0",
     "wdio-docker-service": "^3.2.1",
     "wdio-slack-service": "^2.0.9"
