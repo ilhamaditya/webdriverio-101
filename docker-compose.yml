@@ -17,7 +17,9 @@ services:
       - SCREEN_WIDTH=1920     # Set screen resolution width (optional)
       - SCREEN_HEIGHT=1080    # Set screen resolution height (optional)
       - SCREEN_DEPTH=24       # Set screen color depth (optional)
-    command: ["-limit", "5"]
+    command:
+      - "-limit"
+      - "5"  # Limit the number of concurrent sessions
     restart: unless-stopped
 
   selenoid-ui:
@@ -27,7 +29,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SELENOID_URI: http://host.docker.internal:4444
+      SELENOID_URI: http://selenoid:4444  # Use the internal service name for communication within Docker
     restart: unless-stopped
 
   allure:
