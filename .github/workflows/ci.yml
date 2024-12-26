@@ -19,7 +19,7 @@ jobs:
 
     services:
       docker:
-        image: selenium/standalone-chrome:latest
+        image: selenoid/vnc:chrome_114.0
         options: --privileged --add-host=host.docker.internal:host-gateway
         ports:
           - 4444:4444

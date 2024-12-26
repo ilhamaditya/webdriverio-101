@@ -9,7 +9,7 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        // Remove the local path to Chrome and rely on the Docker container
+        binary: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         args: [
           "--headless", // Ensure headless mode
           "--no-sandbox", // Disable the sandbox for Docker environments
@@ -21,7 +21,6 @@ exports.config = {
       },
     },
   ],
-
   logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
