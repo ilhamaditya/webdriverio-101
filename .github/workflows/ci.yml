@@ -12,10 +12,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        attempt: [1, 2, 3]  # Retry job up to 3 times
 
     services:
       docker:
@@ -69,16 +65,8 @@ jobs:
 
       - name: Start Docker Compose
         run: |
-          attempts=3
-          until docker-compose -f docker-compose.yml up -d || [ $attempts -eq 0 ]; do
-            echo "Retrying to start Docker Compose..."
-            sleep 10
-            ((attempts--))
-          done
-          if [ $attempts -eq 0 ]; then
-            echo "Docker Compose failed to start after 3 attempts!"
-            exit 1
-          fi
+          docker-compose -f docker-compose.yml up -d
+          docker-compose ps
 
       - name: Wait for All Services
         run: |
@@ -102,20 +90,10 @@ jobs:
           WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
           WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          attempts=3
-          until npm run dock || [ $attempts -eq 0 ]; do
-            echo "Retrying WebdriverIO tests..."
-            sleep 10
-            ((attempts--))
-          done
-          if [ $attempts -eq 0 ]; then
-            echo "WebdriverIO tests failed after 3 attempts!"
-            exit 1
-          fi
+        run: npm run dock
 
       - name: Debug Environment Variables
-        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}"  # Avoid printing actual secrets!
+        run: echo "WEB_URL is set to \${{ secrets.WEB_URL }}" # Avoid printing actual secrets!
 
       - name: Notify Slack
         if: always()
@@ -130,8 +108,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ github.run_id }}  # Use run_id to make the artifact name unique
+          name: allure-results-${{ github.run_id }}
           path: allure-results/
+          if-no-files-found: warn
+          compression-level: 6
+          overwrite: true
+          include-hidden-files: false
+        env:
+          WEB_URL: ${{ secrets.WEB_URL }}
+          WEB_USERNAME: ${{ secrets.WEB_USERNAME }}
+          WEB_PASSWORD: ${{ secrets.WEB_PASSWORD }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Clean Up Docker Containers
         if: always()
