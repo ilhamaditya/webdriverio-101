@@ -9,18 +9,18 @@ exports.config = {
     {
       browserName: "chrome",
       "goog:chromeOptions": {
-        binary: "/usr/bin/google-chrome", // Ensure this is correct for your Docker environment
+        binary: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         args: [
-          // "--headless", // Run in headless mode
-          "--no-sandbox", // Disable sandboxing (necessary for Docker)
-          "--disable-dev-shm-usage", // Overcome memory issues in Docker
-          "--disable-gpu", // Disable GPU acceleration
-          "--window-size=1280x1024", // Set a window size (important for headless mode)
+          "--headless", // Ensure headless mode
+          "--no-sandbox", // Disable the sandbox for Docker environments
+          "--disable-dev-shm-usage", // Overcome Docker limitations
+          "--disable-gpu", // Disable GPU for headless mode
+          "--window-size=1280x1024", // Set window size for consistent rendering
+          "--remote-debugging-port=9222", // Enable remote debugging
         ],
       },
     },
   ],
-
   logLevel: "trace",
   bail: 0,
   waitforTimeout: 10000,
