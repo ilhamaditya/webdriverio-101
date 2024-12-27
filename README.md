@@ -1,6 +1,6 @@
 # WebdriverIO 101 🚀  
 Simulasi menggunakan WebdriverIO dengan Allure, Docker, GitHub Actions, dan integrasi Slack.
-## 🚀 Youtube Link : [Short Demo](https://youtu.be/Tf0ICCeb2-Q?si=lnebX3SXfQyacRC-)
+## 🚀 Youtube Link : [Short Demo](https://youtu.be/96q6sg6UcNY)
 
 ## 📋 Prasyarat
 Pastikan Anda memiliki:
